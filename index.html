@@ -99,7 +99,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
 }).addTo(leafletMap);
 
-var leafletMarker = L.marker([52.23, 6.85]).addTo(leafletMap);
+var leafletMarker = L.marker([52.237, 6.854]).addTo(leafletMap);
 
 leafletMarker.bindPopup('Faculty ITC');
 
@@ -111,7 +111,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
 }).addTo(leafletMap);
 
-var leafletMarker = L.marker([52.23, 6.85]).addTo(leafletMap);
+var leafletMarker = L.marker([52.237, 6.854]).addTo(leafletMap);
 
 leafletMarker.bindPopup('Faculty ITC');
 `;
@@ -132,7 +132,7 @@ var openLayersMap = new ol.Map({
 });
 
 var openLayersMarker = new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([6.85, 52.23]))
+    geometry: new ol.geom.Point(ol.proj.fromLonLat([6.854, 52.237]))
 });
 
 var openLayersMarkerStyle = new ol.style.Style({
@@ -203,7 +203,7 @@ var openLayersMap = new ol.Map({
 });
 
 var openLayersMarker = new ol.Feature({
-    geometry: new ol.geom.Point(ol.proj.fromLonLat([6.85, 52.23]))
+    geometry: new ol.geom.Point(ol.proj.fromLonLat([6.854, 52.237]))
 });
 
 var openLayersMarkerStyle = new ol.style.Style({
