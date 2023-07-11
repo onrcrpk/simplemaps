@@ -143,7 +143,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 maxZoom: 18
 }).addTo(leafletMap);
 
-// Creates a new marker at the specified coordinates and adds it to the map.
+// Creates a new marker at location of ITC Faculty and adds it to the map.
 var leafletMarker = L.marker([52.2378, 6.8545]).addTo(leafletMap);
 
 // Binds a popup to the marker with the specified text, which will be displayed when the marker is clicked.
@@ -224,7 +224,7 @@ openLayersMap.on('click', function (event) {
 
 
 document.getElementById('openlayers-code-content').innerHTML =  Prism.highlight(`
-// Creates a new OpenLayers map targeted at the HTML element with the id 'openlayers-map', with a tile layer using OpenStreetMap tiles and a view centered at the given coordinates with a zoom level of 10.
+// Creates a new Leaflet map in the HTML element with the id 'openlayers-map',  with a tile layer using OpenStreetMap tiles, centers it at the given coordinates (latitude 52.2, longitude 6.9) and sets the initial zoom level to 10.
 var openLayersMap = new ol.Map({
 target: 'openlayers-map',
 layers: [
@@ -238,12 +238,12 @@ zoom: 10
 })
 });
 
-// Creates a new feature (an object that can be displayed on the map), which in this case is a point at the specified coordinates.
+// Creates a new a point at the specified coordinates.
 var openLayersMarker = new ol.Feature({
 geometry: new ol.geom.Point(ol.proj.fromLonLat([6.8545, 52.2378]))
 });
 
-// Creates a new style for the feature, which in this case is an icon with the specified image.
+// Creates a new style for the feature
 var openLayersMarkerStyle = new ol.style.Style({
 image: new ol.style.Icon({
 src: 'https://openlayers.org/en/latest/examples/data/icon.png'
@@ -253,7 +253,7 @@ src: 'https://openlayers.org/en/latest/examples/data/icon.png'
 // Applies the style to the feature.
 openLayersMarker.setStyle(openLayersMarkerStyle);
 
-// Creates a new vector source and adds the feature to it. A source is an object that provides data that can be displayed on the map.
+// Creates a new vector source and adds the feature to it.
 var openLayersVectorSource = new ol.source.Vector({
 features: [openLayersMarker]
 });
@@ -266,7 +266,7 @@ source: openLayersVectorSource
 // Adds the layer to the map.
 openLayersMap.addLayer(openLayersVectorLayer);
 
-// Creates a new overlay for the map, which will be used for the popup. The overlay is positioned at the bottom center of the target, and it will not stop events (allowing the map to be interacted with through the overlay).
+// Creates a new overlay for the map for the popup. The overlay is positioned at the bottom center of the target, and it will not stop events.
 var overlay = new ol.Overlay({
 element: document.getElementById('popup'),
 positioning: 'bottom-center',
