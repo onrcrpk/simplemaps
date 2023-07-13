@@ -96,7 +96,7 @@ h3 {
         <div class="map-box">
           <div id="leaflet-map" class="map"></div>
           <div id="leaflet-code">
-            <h2>Leaflet Code:</h2>
+            <h2>Leaflet</h2>
             <pre>
               <code id="leaflet-code-content"></code>
             </pre>
@@ -106,7 +106,7 @@ h3 {
         <div class="map-box">
           <div id="openlayers-map" class="map"></div>
           <div id="openlayers-code">
-            <h2>OpenLayers Code:</h2>
+            <h2>OpenLayers</h2>
             <pre>
               <code id="openlayers-code-content"></code>
             </pre>
@@ -121,9 +121,12 @@ h3 {
 
     <script>
 
-// Leaflet Map
 
+// Leaflet Map
 var leafletMap = L.map('leaflet-map').setView([52.2, 6.9], 10);
+
+// Add a scale control to the map that only shows kilometers
+L.control.scale({metric: true, imperial: false}).addTo(leafletMap);
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 18
@@ -135,57 +138,90 @@ leafletMarker.bindPopup('Faculty ITC');
 
 
 document.getElementById('leaflet-code-content').innerHTML = Prism.highlight(`
-// Creates a new Leaflet map in the HTML element with the id 'leaflet-map', centers it at the given coordinates (latitude 52.2, longitude 6.9) and sets the initial zoom level to 10.
 var leafletMap = L.map('leaflet-map').setView([52.2, 6.9], 10);
 
-// Creates a tile layer using OpenStreetMap tiles and adds it to the map. The maxZoom option is set to 18.
+L.control.scale({metric: true, imperial: false}).addTo(leafletMap);
+
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-maxZoom: 18
+    maxZoom: 18
 }).addTo(leafletMap);
 
-// Creates a new marker at location of ITC Faculty and adds it to the map.
 var leafletMarker = L.marker([52.2378, 6.8545]).addTo(leafletMap);
 
-// Binds a popup to the marker with the specified text, which will be displayed when the marker is clicked.
 leafletMarker.bindPopup('Faculty ITC');
 `, Prism.languages.javascript, 'javascript');
 
 
-// OpenLayers Map
+// Create new OpenLayers map, point feature, and styles
 var openLayersMap = new ol.Map({
     target: 'openlayers-map',
-    layers: [
-        new ol.layer.Tile({
-            source: new ol.source.OSM()
-        })
-    ],
-    view: new ol.View({
-        center: ol.proj.fromLonLat([6.9, 52.2]),
-        zoom: 10
-    })
+    layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
+    view: new ol.View({ center: ol.proj.fromLonLat([6.9, 52.2]), zoom: 10 })
 });
+
+// Add a scale line control to the map
+openLayersMap.addControl(new ol.control.ScaleLine());
 
 var openLayersMarker = new ol.Feature({
     geometry: new ol.geom.Point(ol.proj.fromLonLat([6.8545, 52.2378]))
 });
 
-var openLayersMarkerStyle = new ol.style.Style({
-    image: new ol.style.Icon({
-        src: 'https://openlayers.org/en/latest/examples/data/icon.png'
-    })
+openLayersMarker.setStyle(new ol.style.Style({
+    image: new ol.style.Icon({ src: 'https://openlayers.org/en/latest/examples/data/icon.png' })
+}));
+
+// Create vector source, layer, and add to map
+openLayersMap.addLayer(new ol.layer.Vector({
+    source: new ol.source.Vector({ features: [openLayersMarker] })
+}));
+
+// Create overlay and add to map
+var overlay = new ol.Overlay({
+    element: document.getElementById('popup'),
+    positioning: 'bottom-center',
+    stopEvent: false
 });
 
-openLayersMarker.setStyle(openLayersMarkerStyle);
+openLayersMap.addOverlay(overlay);
 
-var openLayersVectorSource = new ol.source.Vector({
-    features: [openLayersMarker]
+// Add event listener for click events
+openLayersMap.on('click', function (event) {
+    var feature = openLayersMap.forEachFeatureAtPixel(event.pixel, function (feature) {
+        return feature;
+    });
+
+    if (feature) {
+        overlay.setPosition(feature.getGeometry().getCoordinates());
+        
+        var popupContent = document.getElementById('popup-content');
+        popupContent.innerHTML = 'Faculty ITC';
+        popupContent.style.cssText = "font-family: Arial, sans-serif; font-size: 14px; color: #333; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);";
+    } else {
+        overlay.setPosition(undefined);
+    }
 });
 
-var openLayersVectorLayer = new ol.layer.Vector({
-    source: openLayersVectorSource
+
+document.getElementById('openlayers-code-content').innerHTML =  Prism.highlight(`
+var openLayersMap = new ol.Map({
+    target: 'openlayers-map',
+    layers: [new ol.layer.Tile({ source: new ol.source.OSM() })],
+    view: new ol.View({ center: ol.proj.fromLonLat([6.9, 52.2]), zoom: 10 })
 });
 
-openLayersMap.addLayer(openLayersVectorLayer);
+openLayersMap.addControl(new ol.control.ScaleLine());
+
+var openLayersMarker = new ol.Feature({
+    geometry: new ol.geom.Point(ol.proj.fromLonLat([6.8545, 52.2378]))
+});
+
+openLayersMarker.setStyle(new ol.style.Style({
+    image: new ol.style.Icon({ src: 'https://openlayers.org/en/latest/examples/data/icon.png' })
+}));
+
+openLayersMap.addLayer(new ol.layer.Vector({
+    source: new ol.source.Vector({ features: [openLayersMarker] })
+}));
 
 var overlay = new ol.Overlay({
     element: document.getElementById('popup'),
@@ -195,110 +231,18 @@ var overlay = new ol.Overlay({
 
 openLayersMap.addOverlay(overlay);
 
+
 openLayersMap.on('click', function (event) {
     var feature = openLayersMap.forEachFeatureAtPixel(event.pixel, function (feature) {
         return feature;
     });
 
     if (feature) {
-        var coordinate = feature.getGeometry().getCoordinates();
-        overlay.setPosition(coordinate);
+        overlay.setPosition(feature.getGeometry().getCoordinates());
         
-        // Applying styling to the popup content
         var popupContent = document.getElementById('popup-content');
         popupContent.innerHTML = 'Faculty ITC';
-        popupContent.style.fontFamily = 'Arial, sans-serif';
-        popupContent.style.fontSize = '14px';
-        popupContent.style.color = '#333';
-        popupContent.style.padding = '10px';
-        popupContent.style.background = '#fff';
-        popupContent.style.border = '1px solid #ccc';
-        popupContent.style.borderRadius = '4px';
-        popupContent.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
-    } else {
-        overlay.setPosition(undefined);
-    }
-});
-
-
-
-
-document.getElementById('openlayers-code-content').innerHTML =  Prism.highlight(`
-// Creates a new OpenLayers map in the HTML element with the id 'openlayers-map',  with a tile layer using OpenStreetMap tiles, centers it at the given coordinates (latitude 52.2, longitude 6.9) and sets the initial zoom level to 10.
-var openLayersMap = new ol.Map({
-target: 'openlayers-map',
-layers: [
-new ol.layer.Tile({
-source: new ol.source.OSM()
-})
-],
-view: new ol.View({
-center: ol.proj.fromLonLat([6.9, 52.2]),
-zoom: 10
-})
-});
-
-// Creates a new a point at the specified coordinates.
-var openLayersMarker = new ol.Feature({
-geometry: new ol.geom.Point(ol.proj.fromLonLat([6.8545, 52.2378]))
-});
-
-// Creates a new style for the feature
-var openLayersMarkerStyle = new ol.style.Style({
-image: new ol.style.Icon({
-src: 'https://openlayers.org/en/latest/examples/data/icon.png'
-})
-});
-
-// Applies the style to the feature.
-openLayersMarker.setStyle(openLayersMarkerStyle);
-
-// Creates a new vector source and adds the feature to it.
-var openLayersVectorSource = new ol.source.Vector({
-features: [openLayersMarker]
-});
-
-// Creates a new vector layer using the vector source and adds it to the map. A layer is a collection of features that are displayed together on the map.
-var openLayersVectorLayer = new ol.layer.Vector({
-source: openLayersVectorSource
-});
-
-// Adds the layer to the map.
-openLayersMap.addLayer(openLayersVectorLayer);
-
-// Creates a new overlay for the map for the popup. The overlay is positioned at the bottom center of the target, and it will not stop events.
-var overlay = new ol.Overlay({
-element: document.getElementById('popup'),
-positioning: 'bottom-center',
-stopEvent: false
-});
-
-// Adds the overlay to the map.
-openLayersMap.addOverlay(overlay);
-
-// Adds an event listener for click events on the map.
-openLayersMap.on('click', function (event) {
-// Checks if there is a feature at the clicked pixel.
-var feature = openLayersMap.forEachFeatureAtPixel(event.pixel, function (feature) {
-return feature;
-});
-
-// If there is a feature, it sets the position of the overlay to the coordinates of the feature and styles the popup content. If there is not, it sets the position of the overlay to undefined, effectively hiding it.
-    if (feature) {
-        var coordinate = feature.getGeometry().getCoordinates();
-        overlay.setPosition(coordinate);
-        
-        // Applying styling to the popup content
-        var popupContent = document.getElementById('popup-content');
-        popupContent.innerHTML = 'Faculty ITC';
-        popupContent.style.fontFamily = 'Arial, sans-serif';
-        popupContent.style.fontSize = '14px';
-        popupContent.style.color = '#333';
-        popupContent.style.padding = '10px';
-        popupContent.style.background = '#fff';
-        popupContent.style.border = '1px solid #ccc';
-        popupContent.style.borderRadius = '4px';
-        popupContent.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.2)';
+        popupContent.style.cssText = "font-family: Arial, sans-serif; font-size: 14px; color: #333; padding: 10px; background: #fff; border: 1px solid #ccc; border-radius: 4px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);";
     } else {
         overlay.setPosition(undefined);
     }
